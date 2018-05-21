@@ -6,6 +6,9 @@ const gravatar = require("gravatar");
 
 const bcrypt = require("bcryptjs");
 
+const jwt = require("jsonwebtoken");
+const keys = require("../../config/myKey");
+
 const User = require("../../models/User");
 
 router.get("/test", (req, res) => {
@@ -61,7 +64,15 @@ router.post("/login", (req, res) => {
 
     bcrypt.compare(password, user.password).then(dataMatch => {
       if (dataMatch) {
-        res.json({ msg: "success" });
+        // if user is macthed
+        //creating the jwt payload
+        const payload = { id: user.id, name: user.name, pic: user.pic };
+
+        //jwt to sign the token
+
+        jwt.sign(payload, keys.secret, { expiresIn: 36000 }, (err, token) => {
+          res.json({ success: true, token: "Bearer" + token });
+        });
       } else {
         return res.status(400).json({ password: "incorrect password" });
       }
