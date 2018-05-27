@@ -10,6 +10,8 @@ const Profile = require("../../models/Profile"); //loading the Profile model
 
 const User = require("../../models/User"); // loading the user model
 
+const profileInputvalidation = require("../../validation/profile"); //loading validation
+
 //testing if profile route works
 router.get("/test", (req, res) => {
   res.json({ msg: "profile now avaliable" });
@@ -21,6 +23,7 @@ router.get(
   (req, res) => {
     const errors = {};
     Profile.findOne({ user: req.user.id })
+      .populate("user", ["name", "pic"])
       .then(profile => {
         if (!profile) {
           errors.zeroprofile = "zero profile for the user ";
@@ -29,6 +32,70 @@ router.get(
         res.json(profile);
       })
       .then(err => res.status(404).json(err));
+  }
+);
+
+//creating/editing  the user profile which is private
+router.post(
+  "/",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    const { errors, isValid } = profileInputvalidation(req.body); //destructurign or say pulling out this identifiers from the register.js //this is possible becuase we are returning the errors, isValid in register.us
+
+    if (!isValid) {
+      return res.status(400).json(errors);
+    }
+
+    const getProfileFileds = {};
+
+    getProfileFileds.user = req.user.id;
+    if (req.body.handle) getProfileFileds.handle = req.body.handle;
+    if (req.body.company) getProfileFileds.company = req.body.company;
+    if (req.body.website) getProfileFileds.website = req.body.website;
+    if (req.body.bio) getProfileFileds.bio = req.body.bio;
+    if (req.body.status) getProfileFileds.status = req.body.status;
+    if (req.body.github) getProfileFileds.github = req.github;
+
+    //split skills into arrays
+    if (typeof req.body.skills !== "undefined") {
+      getProfileFileds.skills = req.body.skills.split(",");
+    }
+
+    // social input
+    getProfileFileds.social = {};
+
+    if (req.body.youtube) getProfileFileds.social.youtube = req.body.youtube;
+    if (req.body.twitter) getProfileFileds.social.twitter = req.body.twitter;
+    if (req.body.facebook) getProfileFileds.social.facebook = req.body.facebook;
+    if (req.body.linkdn) getProfileFileds.social.linkdn = req.body.linkdn;
+    if (req.body.instagram)
+      getProfileFileds.social.instagram = req.body.instagram;
+
+    Profile.findOne({ user: req.user.id }).then(profile => {
+      if (profile) {
+        //update
+        Profile.findOneAndUpdate(
+          { user: req.user.id },
+          { $set: getProfileFileds },
+          { new: true }
+        ).then(profile => res.json());
+      } else {
+        //create
+
+        //check if handle exists
+        Profile.findOne({ handle: getProfileFileds.handle }).then(profile => {
+          if (profile) {
+            errors.handle = "that handle already exist";
+            res.status(400).json(errors);
+          }
+
+          // save profile
+          new Profile(getProfileFileds)
+            .save()
+            .then(profile => res.json(profile));
+        });
+      }
+    });
   }
 );
 module.exports = router;
