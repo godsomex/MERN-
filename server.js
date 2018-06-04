@@ -28,7 +28,7 @@ mongoose
 
 app.use(passport.initialize());
 
-//passport setup
+//passport setupss
 require("./config/passport")(passport);
 
 app.get("/", (req, res) => res.send("hello adidas "));

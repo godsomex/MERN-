@@ -35,12 +35,67 @@ router.get(
   }
 );
 
-//creating/editing  the user profile which is private
+//getting all users profile which is public
+// GET request to api/profile/all
+router.get("/all", (req, res) => {
+  const errors = {};
+  Profile.find()
+    .populate("users", ["name", "pic"])
+    .then(proiles => {
+      if (!profiles) {
+        errors.zeroprofile = "there are no profiles";
+        return res.status(404).json(erros);
+      }
+      res.json(profiles);
+    })
+    .catch(err => {
+      res
+        .status(404)
+        .json({
+          profile: "internal erro occured while retrieving all the users "
+        });
+    });
+});
+
+//getting the profile by user ID, a public route
+// GET request to api/profile/handle/:user_id
+router.get("/handle/:user_id", (req, res) => {
+  const errors = {};
+  Profile.findOne({ user: req.params.user_id })
+    .populate("user", ["name", "pic"])
+    .then(profile => {
+      if (!profile) {
+        errors.zeroprofile = "there is no profile for the user";
+        return res.status(404).json(errors);
+      }
+      res.json(profile); // if there re no errors return a response with the profile payload
+    })
+    .catch(err =>
+      res.status(404).json({ profile: "error occured internally" })
+    );
+});
+
+//getting the profile by handle, a public route
+// GET request to api/profile/handle/:handle
+router.get("/handle/:handle", (req, res) => {
+  const errors = {};
+  Profile.findOne({ handle: req.params.handle })
+    .populate("user", ["name", "pic"])
+    .then(profile => {
+      if (!profile) {
+        errors.zeroprofile = "there is no profile for the user";
+        return res.status(404).json(errors);
+      }
+      res.json(profile); // if there re no errors return a response with the profile payload
+    })
+    .catch(err => res.status(404).json(err));
+});
+
 router.post(
   "/",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
-    const { errors, isValid } = profileInputvalidation(req.body); //destructurign or say pulling out this identifiers from the register.js //this is possible becuase we are returning the errors, isValid in register.us
+    const { errors, isValid } = profileInputvalidation(req.body); //destructuring or say pulling out this identifiers from the register.js //this is possible becuase we are returning the errors, isValid in register.us
 
     if (!isValid) {
       return res.status(400).json(errors);
