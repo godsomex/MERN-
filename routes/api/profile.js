@@ -49,11 +49,9 @@ router.get("/all", (req, res) => {
       res.json(profiles);
     })
     .catch(err => {
-      res
-        .status(404)
-        .json({
-          profile: "internal erro occured while retrieving all the users "
-        });
+      res.status(404).json({
+        profile: "internal erro occured while retrieving all the users "
+      });
     });
 });
 
@@ -150,6 +148,32 @@ router.post(
             .then(profile => res.json(profile));
         });
       }
+    });
+  }
+);
+
+//addig experience to profile routes
+//POST request
+//priavte route
+
+router.post(
+  "/experience",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    Profile.findOne({ user: req.user.id }).then(profile => {
+      const newObjExperience = {
+        title: req.body.title,
+        organisation: req.body.organisation,
+        location: req.body.location,
+        from: req.body.from,
+        to: req.body.to,
+        current: req.body.current,
+        description: req.body.description
+      };
+
+      //add to experience array
+      Profile.experience.unshift(newObjExperience);
+      Profile.save().then(profile => res.json(profile));
     });
   }
 );
