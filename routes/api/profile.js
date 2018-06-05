@@ -155,7 +155,6 @@ router.post(
 //addig experience to profile routes
 //POST request
 //priavte route
-
 router.post(
   "/experience",
   passport.authenticate("jwt", { session: false }),
@@ -177,4 +176,30 @@ router.post(
     });
   }
 );
+
+//addig education to profile routes
+//POST request
+//priavte route
+router.post(
+  "/academics",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    Profile.findOne({ user: req.user.id }).then(profile => {
+      const newObjAcademics = {
+        school: req.body.school,
+        degree: req.body.organisation,
+        discipline: req.body.location,
+        from: req.body.from,
+        to: req.body.to,
+        current: req.body.current,
+        description: req.body.description
+      };
+
+      //add to experience array
+      Profile.academics.unshift(newObjAcademics);
+      Profile.save().then(profile => res.json(profile));
+    });
+  }
+);
+
 module.exports = router;
