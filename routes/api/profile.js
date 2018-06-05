@@ -10,7 +10,11 @@ const Profile = require("../../models/Profile"); //loading the Profile model
 
 const User = require("../../models/User"); // loading the user model
 
-const profileInputvalidation = require("../../validation/profile"); //loading validation
+const profileInputvalidation = require("../../validation/profile"); //loading profile validation
+
+const experienceInputvalidation = require("../../validation/experience"); // experience valiadtion
+
+const academicsInputvalidation = require("../../validation/academics"); // Academics valiadtion
 
 //testing if profile route works
 router.get("/test", (req, res) => {
@@ -153,13 +157,21 @@ router.post(
 );
 
 //addig experience to profile routes
-//POST request
+//POST request api/profile/experience
 //priavte route
 router.post(
   "/experience",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
+    //checking if fields are completed
+    const { errors, isValid } = experienceInputvalidation(req.body); //destructuring or say pulling out this identifiers from the register.js //this is possible becuase we are returning the errors, isValid in register.us
+
+    if (!isValid) {
+      return res.status(400).json(errors);
+    }
+
     Profile.findOne({ user: req.user.id }).then(profile => {
+      //req.user.id comes from the token
       const newObjExperience = {
         title: req.body.title,
         organisation: req.body.organisation,
@@ -171,19 +183,25 @@ router.post(
       };
 
       //add to experience array
-      Profile.experience.unshift(newObjExperience);
-      Profile.save().then(profile => res.json(profile));
+      profile.experience.unshift(newObjExperience);
+      profile.save().then(profile => res.json(profile));
     });
   }
 );
 
-//addig education to profile routes
+//adding education to profile routes
 //POST request
 //priavte route
 router.post(
   "/academics",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
+    // checking if the fields are filled out
+    const { errors, isValid } = academicsInputvalidation(req.body); //destructuring or say pulling out this identifiers from the register.js //this is possible becuase we are returning the errors, isValid in register.us
+    if (!isValid) {
+      return res.status(400).json(errors);
+    }
+
     Profile.findOne({ user: req.user.id }).then(profile => {
       const newObjAcademics = {
         school: req.body.school,
@@ -195,9 +213,9 @@ router.post(
         description: req.body.description
       };
 
-      //add to experience array
-      Profile.academics.unshift(newObjAcademics);
-      Profile.save().then(profile => res.json(profile));
+      //add to education array
+      profile.academics.unshift(newObjAcademics);
+      profile.save().then(profile => res.json(profile));
     });
   }
 );
