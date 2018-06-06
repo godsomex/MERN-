@@ -240,9 +240,9 @@ router.delete(
   }
 );
 
-//deleting academics
+// deleting academics
 // delete request to api/profile/academics/academic_id
-//delete request which is a priavte route
+// delete request which is a priavte route
 router.delete(
   "/academics/:academic_id",
   passport.authenticate("jwt", { session: false }),
@@ -258,6 +258,21 @@ router.delete(
         .save()
         .then(profile => res.json(profile))
         .catch(err => res.status(404).json(err));
+    });
+  }
+);
+
+// deleteing user and profile
+// delete request to api/profile/
+// delete request which is a priavte route
+router.delete(
+  "/",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    Profile.findOneAndRemove({ user: req.user.id }).then(() => {
+      User.findOneAndRemove({ _id: req.user.id }).then(() =>
+        res.json({ success: true })
+      );
     });
   }
 );
