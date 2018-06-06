@@ -42,7 +42,7 @@ const ProfileSchema = new Schema({
         type: String,
         required: true
       },
-      company: {
+      organisation: {
         type: String,
         required: true
       },
@@ -65,7 +65,7 @@ const ProfileSchema = new Schema({
       }
     }
   ],
-  education: [
+  academics: [
     {
       school: {
         type: String,
@@ -75,7 +75,7 @@ const ProfileSchema = new Schema({
         type: String,
         required: true
       },
-      field: {
+      discipline: {
         type: String
       },
       from: {
