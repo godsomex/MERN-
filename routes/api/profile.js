@@ -226,7 +226,7 @@ router.delete(
   "/experince/:exp_id",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
-    Profile.findOne({ user: user.req.id }).then(profile => {
+    Profile.findOne({ user: req.user.id }).then(profile => {
       const removeIndex = profile.experience
         .map(item => item.id)
         .indexOf(req.params.exp_id);
@@ -239,4 +239,27 @@ router.delete(
     });
   }
 );
+
+//deleting academics
+// delete request to api/profile/academics/academic_id
+//delete request which is a priavte route
+router.delete(
+  "/academics/:academic_id",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    Profile.findOne({ user: req.user.id }).then(profile => {
+      //loop through all user's cademics to find the right id to delete
+      const removeIndex = profile.academics
+        .map(item => item.id)
+        .indexOf(req.params.academic_id);
+      //splice out of array
+      profile.academics.splice(removeIndex, 1);
+      profile
+        .save()
+        .then(profile => res.json(profile))
+        .catch(err => res.status(404).json(err));
+    });
+  }
+);
+
 module.exports = router;
