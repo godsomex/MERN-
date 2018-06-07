@@ -29,14 +29,15 @@ router.get("/", (req, res) => {
 });
 
 // get a single post
-
 router.get("/:id", (req, res) => {
   Tweet.findById(req.params.findById)
     .then(tweet => res.json(tweet))
     .catch(err => res.status(400).json({ noTweet: "no tweet was found" }));
 });
+
 //making a post request to api/tweets
 //it will be a private route
+// creating a tweet
 router.post(
   "/tweets",
   passport.authenticate("jwt", { session: false }),
