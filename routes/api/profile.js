@@ -264,7 +264,7 @@ router.delete(
 
 // deleteing user and profile
 // delete request to api/profile/
-// delete request which is a priavte route
+// delete request which is a private route
 router.delete(
   "/",
   passport.authenticate("jwt", { session: false }),
