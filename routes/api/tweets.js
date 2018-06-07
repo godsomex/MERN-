@@ -13,6 +13,24 @@ router.get("/test", (req, res) => {
   res.json({ msg: "tweets are raining" });
 });
 
+//get all tweets
+router.get("/", (req, res) => {
+  Tweet.find()
+    .sort({ date: -1 })
+    .then(tweets => {
+      res.json(tweets).catch(err => {
+        res.status(400).json({ noTweets: "no tweets were found" });
+      });
+    });
+});
+
+// get a single post
+
+router.get("/:id", (req, res) => {
+  Tweet.findById(req.params.findById)
+    .then(tweet => res.json(tweet))
+    .catch(err => res.status(400).json({ noTweet: "no tweet was found" }));
+});
 //making a post request to api/tweets
 //it will be a private route
 router.post(
