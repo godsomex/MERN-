@@ -134,4 +134,69 @@ router.post(
   }
 );
 
+//comment route with a post request to /api/tweets/comment/:id
+
+router.post(
+  "/comment/:id",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    const { errors, Valid } = tweetInputvalidation(req.body);
+
+    if (!Valid) {
+      return res.status(404).json(errors);
+    }
+    Tweet.findById(req.params.id).then(tweet => {
+      const newComment = {
+        text: req.body.text,
+        name: req.body.name,
+        pic: req.body.pic,
+        user: req.body.user
+      };
+
+      //add commments array
+      tweet.comments.unshift(newComment);
+      //save
+      tweet
+        .save()
+        .then(tweet => res.json(tweet))
+        .catch(err => res.status(404).json({ noTweet: "Tweet not saved" }));
+    });
+  }
+);
+
+//delete api/tweets/comment/:id/:comment_id
+
+router.delete(
+  "/comment/:id/:comment_id",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    Tweet.findById(req.params.id).then(tweet => {
+      //check if comment exist
+
+      if (
+        tweetcomments.filter(comment => {
+          (comment._id.toString() === req.params.comment_id.length) === 0;
+        })
+      ) {
+        return res.status(404).json({ noComment: "no comment exist" });
+      }
+
+      //remove Index
+      const removeIndex = tweet.comments
+        .map(item => item._id.toString())
+        .indexOf(req.params.comment_id);
+
+      //splice comment out of array
+      tweet.comments.splice(removeIndex, 1);
+      //save
+      tweet
+        .save()
+        .then(tweet => res.json(tweet))
+        .catch(err =>
+          res.status(404).json({ tweetnotfopund: "no post found" })
+        );
+    });
+  }
+);
+
 module.exports = router;
