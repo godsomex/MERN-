@@ -58,7 +58,7 @@ router.post(
   }
 );
 
-// delete tweets with a delete request to api/posts/:id
+// delete tweets with a delete request to api/tweets/:id
 //private route
 router.delete(
   "/:id",
@@ -77,6 +77,31 @@ router.delete(
           .then(() => res.json({ success: true }))
           .catch(err => res.status(404).json({ zeropost: "no post found" }));
       });
+    });
+  }
+);
+
+//like tweets with a post request to api/tweets/like/:id
+//private route
+router.post(
+  "/like/:id",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    Profile.findOne({ user: req.user.id }).then(profile => {
+      Tweet.findById(req.params.id)
+        .then(tweet => {
+          if (
+            tweet.likes.filter(like => like.user.toString() === req.user.id)
+              .lenght > 0
+          ) {
+            return res.status(400).json({ liked: "liked already" });
+          }
+          //Add user id to likes array
+          tweet.likes.unshift({ user: req.user.id });
+          //save to db
+          tweet.save().then(tweet => res.json(tweet));
+        })
+        .catch(err => res.status(404).json({ notweetFound: "no tweet found" }));
     });
   }
 );
