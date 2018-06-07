@@ -6,6 +6,8 @@ const passport = require("passport");
 
 //importing the tweet model
 const Tweet = require("../../models/Tweet");
+//importing the tweet validation
+const tweetInputvalidation = require("../../validation/tweets");
 
 router.get("/test", (req, res) => {
   res.json({ msg: "tweets are raining" });
@@ -17,6 +19,11 @@ router.post(
   "/tweets",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
+    const { errors, Valid } = tweetInputvalidation(req.body);
+
+    if (!Valid) {
+      return res.status(404).json(errors);
+    }
     newTweet = new Tweet({
       text: req.body.text,
       name: req.body.name,
