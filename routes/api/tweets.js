@@ -106,4 +106,32 @@ router.post(
   }
 );
 
+//unlike tweets with a post request to api/tweets/unlike/:id
+router.post(
+  "/unlike/:id",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    Profile.findOne({ user: req.user.id }).then(profile => {
+      Tweet.findById(req.params.id).then(tweet => {
+        if (
+          tweet.like.filter(like => like.user.toString() === req.user.id)
+            .lenght === 0
+        ) {
+          return res
+            .status(400)
+            .json({ notlike: "ypu have not like this tweet" });
+        }
+        //remove index
+        const removeIndex = tweet.likes
+          .map(item => item.user.toString())
+          .indexOf(req.user.id);
+
+        //splice out of array
+        post.likes.splice(removeIndex, 1);
+        post.save().then(tweet => res.json(tweet));
+      });
+    });
+  }
+);
+
 module.exports = router;
