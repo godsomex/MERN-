@@ -15,6 +15,7 @@ const keys = require("../../config/myKey");
 const User = require("../../models/User"); //loading user model
 
 const registrationInputValidate = require("../../validation/register");
+const loginInputvalidation = require("../../validation/login");
 
 router.get("/test", (req, res) => {
   res.json({ msg: "users avaliable" });
@@ -22,7 +23,6 @@ router.get("/test", (req, res) => {
 
 router.post("/register", (req, res) => {
   //chcek for number of character entered by someone trying to register
-
   const { errors, isValid } = registrationInputValidate(req.body); //destructurign or say pulling out this identifiers from the register.js //this is possible becuase we are returning the errors, isValid in register.us
 
   if (!isValid) {
@@ -61,6 +61,13 @@ router.post("/register", (req, res) => {
 });
 
 router.post("/login", (req, res) => {
+  //chcek for valid email, no of characters entered by someone trying to login
+  const { errors, isValid } = loginInputvalidation(req.body); //destructurign or say pulling out this identifiers from the register.js //this is possible becuase we are returning the errors, isValid in register.us
+
+  if (!isValid) {
+    return res.status(400).json(errors);
+  }
+
   const email = req.body.email;
   const password = req.body.password;
 
@@ -69,7 +76,8 @@ router.post("/login", (req, res) => {
   User.findOne({ email }).then(user => {
     //check if user is not valid
     if (!user) {
-      return res.status(404).json({ email: "user not found" });
+      errors.email = "user not found";
+      return res.status(404).json(errors);
     }
 
     //match password or say check password
@@ -85,7 +93,8 @@ router.post("/login", (req, res) => {
           res.json({ success: true, token: "Bearer " + token });
         });
       } else {
-        return res.status(400).json({ password: "incorrect password" });
+        errors.password = "incorrect password";
+        return res.status(400).json(errors);
       }
     });
   });

@@ -2,11 +2,15 @@ const Validator = require("validator");
 
 const isEmpty = require("./isEmpty");
 
-function registrationInputvalidation(data) {
+function loginInputvalidation(data) {
   let errors = {};
 
   data.email = !isEmpty(data.email) ? data.email : "";
   data.password = !isEmpty(data.password) ? data.password : "";
+
+  if (!Validator.isEmail(data.email)) {
+    errors.email = "invalid email, please type a valid email";
+  }
 
   if (Validator.isEmpty(data.email)) {
     errors.email = "email field is required";
@@ -20,4 +24,4 @@ function registrationInputvalidation(data) {
   return { errors, isValid: isEmpty(errors) }; // wrap the errors in our created isEmpty function
 }
 
-module.exports = registrationInputvalidation;
+module.exports = loginInputvalidation;
