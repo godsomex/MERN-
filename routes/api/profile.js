@@ -35,7 +35,7 @@ router.get(
         }
         res.json(profile);
       })
-      .then(err => res.status(404).json(err));
+      .catch(err => res.status(404).json(err));
   }
 );
 
@@ -54,7 +54,7 @@ router.get("/all", (req, res) => {
     })
     .catch(err => {
       res.status(404).json({
-        profile: "internal erro occured while retrieving all the users "
+        profile: "internal error occured while retrieving all the users "
       });
     });
 });
@@ -93,18 +93,19 @@ router.get("/handle/:handle", (req, res) => {
     .catch(err => res.status(404).json(err));
 });
 
+// creating or editing user profile by making a post request to api/profile
 router.post(
   "/",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
     const { errors, isValid } = profileInputvalidation(req.body); //destructuring or say pulling out this identifiers from the register.js //this is possible becuase we are returning the errors, isValid in register.us
 
+    //check validation
     if (!isValid) {
-      return res.status(400).json(errors);
+      return res.status(400).json(errors); // returns any error with 400 status
     }
 
     const getProfileFileds = {};
-
     getProfileFileds.user = req.user.id;
     if (req.body.handle) getProfileFileds.handle = req.body.handle;
     if (req.body.company) getProfileFileds.company = req.body.company;
@@ -120,7 +121,6 @@ router.post(
 
     // social input
     getProfileFileds.social = {};
-
     if (req.body.youtube) getProfileFileds.social.youtube = req.body.youtube;
     if (req.body.twitter) getProfileFileds.social.twitter = req.body.twitter;
     if (req.body.facebook) getProfileFileds.social.facebook = req.body.facebook;
@@ -135,9 +135,9 @@ router.post(
           { user: req.user.id },
           { $set: getProfileFileds },
           { new: true }
-        ).then(profile => res.json());
+        ).then(profile => res.json(profile));
       } else {
-        //create
+        //create profile
 
         //check if handle exists
         Profile.findOne({ handle: getProfileFileds.handle }).then(profile => {
