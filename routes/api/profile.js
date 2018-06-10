@@ -44,8 +44,8 @@ router.get(
 router.get("/all", (req, res) => {
   const errors = {};
   Profile.find()
-    .populate("users", ["name", "pic"])
-    .then(proiles => {
+    .populate("user", ["name", "pic"])
+    .then(profiles => {
       if (!profiles) {
         errors.zeroprofile = "there are no profiles";
         return res.status(404).json(erros);
@@ -61,7 +61,7 @@ router.get("/all", (req, res) => {
 
 //getting the profile by user ID, a public route
 // GET request to api/profile/handle/:user_id
-router.get("/handle/:user_id", (req, res) => {
+router.get("/user/:user_id", (req, res) => {
   const errors = {};
   Profile.findOne({ user: req.params.user_id })
     .populate("user", ["name", "pic"])
@@ -73,7 +73,10 @@ router.get("/handle/:user_id", (req, res) => {
       res.json(profile); // if there re no errors return a response with the profile payload
     })
     .catch(err =>
-      res.status(404).json({ profile: "error occured internally" })
+      res.status(404).json({
+        profile:
+          "error occured internally,because there is no profile existing for this users "
+      })
     );
 });
 
@@ -104,7 +107,7 @@ router.post(
     if (!isValid) {
       return res.status(400).json(errors); // returns any error with 400 status
     }
-
+    // get all fields as an object
     const getProfileFileds = {};
     getProfileFileds.user = req.user.id;
     if (req.body.handle) getProfileFileds.handle = req.body.handle;
@@ -189,7 +192,7 @@ router.post(
   }
 );
 
-//adding education to profile routes
+//adding academics to profile routes
 //POST request
 //priavte route
 router.post(
@@ -205,15 +208,15 @@ router.post(
     Profile.findOne({ user: req.user.id }).then(profile => {
       const newObjAcademics = {
         school: req.body.school,
-        degree: req.body.organisation,
-        discipline: req.body.location,
+        degree: req.body.degree,
+        discipline: req.body.discipline,
         from: req.body.from,
         to: req.body.to,
         current: req.body.current,
         description: req.body.description
       };
 
-      //add to education array
+      //add to academics array
       profile.academics.unshift(newObjAcademics);
       profile.save().then(profile => res.json(profile));
     });
@@ -223,7 +226,7 @@ router.post(
 //deleting experience
 //delete request which is a priavte route
 router.delete(
-  "/experince/:exp_id",
+  "/experience/:exp_id",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
     Profile.findOne({ user: req.user.id }).then(profile => {

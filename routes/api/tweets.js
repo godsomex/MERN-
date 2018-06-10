@@ -30,28 +30,30 @@ router.get("/", (req, res) => {
 
 // get a single post
 router.get("/:id", (req, res) => {
-  Tweet.findById(req.params.findById)
+  Tweet.findById(req.params.id)
     .then(tweet => res.json(tweet))
-    .catch(err => res.status(400).json({ noTweet: "no tweet was found" }));
+    .catch(err =>
+      res.status(400).json({ noTweet: "no tweet was found with that id" })
+    );
 });
 
 //making a post request to api/tweets
 //it will be a private route
 // creating a tweet
 router.post(
-  "/tweets",
+  "/",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
-    const { errors, Valid } = tweetInputvalidation(req.body);
+    const { errors, isValid } = tweetInputvalidation(req.body);
 
-    if (!Valid) {
+    if (!isValid) {
       return res.status(404).json(errors);
     }
-    newTweet = new Tweet({
+    const newTweet = new Tweet({
       text: req.body.text,
       name: req.body.name,
       pic: req.body.pic,
-      user: req.body.user
+      user: req.user.id
     });
 
     newTweet.save().then(tweet => res.json(tweet));
@@ -114,7 +116,7 @@ router.post(
     Profile.findOne({ user: req.user.id }).then(profile => {
       Tweet.findById(req.params.id).then(tweet => {
         if (
-          tweet.like.filter(like => like.user.toString() === req.user.id)
+          tweet.likes.filter(like => like.user.toString() === req.user.id)
             .lenght === 0
         ) {
           return res
@@ -127,8 +129,8 @@ router.post(
           .indexOf(req.user.id);
 
         //splice out of array
-        post.likes.splice(removeIndex, 1);
-        post.save().then(tweet => res.json(tweet));
+        tweet.likes.splice(removeIndex, 1);
+        tweet.save().then(tweet => res.json(tweet));
       });
     });
   }
@@ -137,24 +139,24 @@ router.post(
 //comment route with a post request to /api/tweets/comment/:id
 
 router.post(
-  "/comment/:id",
+  "/replies/:id",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
-    const { errors, Valid } = tweetInputvalidation(req.body);
+    const { errors, isValid } = tweetInputvalidation(req.body);
 
-    if (!Valid) {
+    if (!isValid) {
       return res.status(404).json(errors);
     }
     Tweet.findById(req.params.id).then(tweet => {
-      const newComment = {
+      const newReplies = {
         text: req.body.text,
         name: req.body.name,
         pic: req.body.pic,
-        user: req.body.user
+        user: req.user.id
       };
 
-      //add commments array
-      tweet.comments.unshift(newComment);
+      //add replies array
+      tweet.replies.unshift(newReplies);
       //save
       tweet
         .save()
@@ -164,36 +166,36 @@ router.post(
   }
 );
 
-//delete api/tweets/comment/:id/:comment_id
+//delete api/tweets/replies/:id/:replies_id
 
 router.delete(
-  "/comment/:id/:comment_id",
+  "/reply/:id/:reply_id",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
     Tweet.findById(req.params.id).then(tweet => {
-      //check if comment exist
+      //check if reply exist
 
       if (
-        tweetcomments.filter(comment => {
-          (comment._id.toString() === req.params.comment_id.length) === 0;
-        })
+        tweet.replies.filter(
+          reply => reply._id.toString() === req.params.reply_id
+        ).length === 0
       ) {
-        return res.status(404).json({ noComment: "no comment exist" });
+        return res.status(404).json({ noReply: "no reply exist" });
       }
 
       //remove Index
-      const removeIndex = tweet.comments
+      const removeIndex = tweet.replies
         .map(item => item._id.toString())
-        .indexOf(req.params.comment_id);
+        .indexOf(req.params.reply_id);
 
       //splice comment out of array
-      tweet.comments.splice(removeIndex, 1);
+      tweet.replies.splice(removeIndex, 1);
       //save
       tweet
         .save()
         .then(tweet => res.json(tweet))
         .catch(err =>
-          res.status(404).json({ tweetnotfopund: "no post found" })
+          res.status(404).json({ tweetnotfound: "no tweet/reply found" })
         );
     });
   }

@@ -7,7 +7,7 @@ function academicsInputvalidation(data) {
 
   data.school = !isEmpty(data.school) ? data.school : "";
   data.degree = !isEmpty(data.degree) ? data.degree : "";
-  data.school = !isEmpty(data.discipline) ? data.discipline : "";
+  data.discipline = !isEmpty(data.discipline) ? data.discipline : "";
   data.from = !isEmpty(data.from) ? data.from : "";
 
   if (Validator.isEmpty(data.school)) {
