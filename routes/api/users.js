@@ -21,9 +21,10 @@ router.get("/test", (req, res) => {
   res.json({ msg: "users avaliable" });
 });
 
+//resgitering new user 
 router.post("/register", (req, res) => {
   //chcek for number of character entered by someone trying to register
-  const { errors, isValid } = registrationInputValidate(req.body); //destructurign or say pulling out this identifiers from the register.js //this is possible becuase we are returning the errors, isValid in register.us
+  const { errors, isValid } = registrationInputValidate(req.body); //destructuring or say pulling out this identifiers from the register.js //this is possible becuase we are returning the errors, isValid in register.us
 
   if (!isValid) {
     return res.status(400).json(errors);
@@ -60,6 +61,7 @@ router.post("/register", (req, res) => {
   });
 });
 
+//login route by making a post request to /api/users/login
 router.post("/login", (req, res) => {
   //chcek for valid email, no of characters entered by someone trying to login
   const { errors, isValid } = loginInputvalidation(req.body); //destructurign or say pulling out this identifiers from the register.js //this is possible becuase we are returning the errors, isValid in register.us
