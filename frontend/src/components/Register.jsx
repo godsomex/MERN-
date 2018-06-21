@@ -1,6 +1,9 @@
 import React, { Component } from 'react';
-import './register.css'
 import Axios from 'axios';
+import classNames from 'classnames'
+
+import './register.css'
+
 class Register extends Component {
     constructor() {
         super();
@@ -9,7 +12,7 @@ class Register extends Component {
             email : '',
             password: '',
             passwordConfirm: '',
-            error : {}
+            errors : {}
         }
         this.onChange = this.onChange.bind(this)
         this.onSubmit = this.onSubmit.bind(this)
@@ -31,13 +34,18 @@ class Register extends Component {
 
         Axios.post('/api/users/register', newRegisteredUser)
         .then(res => console.log(res.data))
-            .catch(err => console.log(err.response.data))
+            // .catch(err => console.log(err.response.data))
+        .catch(err => this.setState({errors : err.response.data}))
     }
     
     render() {
+
+        //destructuring errors from state 
+        const { errors } = this.state
+
         return (
             <div className="container">
-                <form className="form-horizontal" role="form" onSubmit= {this.onSubmit}>
+                <form className="form-horizontal" role="form" onSubmit={this.onSubmit} noValidate >
                     <div className="row">
                         <div className="col-md-3"></div>
                         <div className="col-md-6">
@@ -53,15 +61,19 @@ class Register extends Component {
                             <div className="form-group">
                                 <div className="input-group mb-2 mr-sm-2 mb-sm-0">
                                     <div className="input-group-addon" id="awesome"><i className="fa fa-user"></i></div>
-                                    <input type="text" name="name" className="form-control" id="name"
-                                        placeholder="John Doe" required autoFocus onChange = {this.onChange} value= {this.state.name} />
+                                    <input type="text" name="name" className = { classNames("form-control", { 'is-invalid' : errors.name })} 
+                                        id="name"
+                                        placeholder="John Doe"
+                                        required autoFocus onChange={this.onChange} value={this.state.name} /> 
+                                        {errors.name && (<div className="invalid-feedback"> {errors.name}</div>)}
                                 </div>
+                                
                             </div>
                         </div>
                         <div className="col-md-3">
-                            <div className="form-control-feedback">
+                            <div className="form-control-feedback invalid-feedback">
                                     <span className="text-danger align-middle">
-                                        
+                                    
                                     </span>
                             </div>
                         </div>
