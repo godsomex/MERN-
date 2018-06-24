@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
 import Axios from 'axios';
 import classNames from 'classnames'
+import { connect } from 'react-redux'
 
 import './register.css'
+import { registerUser } from '../actions/authenticateAction'
 
 class Register extends Component {
     constructor() {
@@ -31,20 +33,21 @@ class Register extends Component {
             passwordConfirm : this.state.passwordConfirm
         }
         // console.log(newRegisteredUser)
-
-        Axios.post('/api/users/register', newRegisteredUser)
-        .then(res => console.log(res.data))
-            // .catch(err => console.log(err.response.data))
-        .catch(err => this.setState({errors : err.response.data}))
+        // Axios.post('/api/users/register', newRegisteredUser)
+        // .then(res => console.log(res.data))
+        //     // .catch(err => console.log(err.response.data))
+        // .catch(err => this.setState({errors : err.response.data}))
+        this.props.registerUser(newRegisteredUser)
     }
     
     render() {
 
         //destructuring errors from state 
         const { errors } = this.state
-
+        const { user } = this.props.auth
         return (
             <div className="container">
+            {/* {user ? user.name : null}  */}
                 <form className="form-horizontal" role="form" onSubmit={this.onSubmit} noValidate >
                     <div className="row">
                         <div className="col-md-3"></div>
@@ -148,4 +151,8 @@ class Register extends Component {
     }
 }
 
-export default Register;
+const mapStateToProps = (state) =>({
+    auth: state.auth_user
+})
+// export default connect(null, registerUser) (Register);
+export default connect(mapStateToProps, { registerUser })(Register);
